@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#17212b">
+  <meta name="description" content="Snapeverse Archive — чати з Северусом Снейпом і Люціусом Малфоєм">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232f6a55'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' font-weight='700' fill='%23eaf6ef' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>Snapeverse · Архів чатів</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Список сцен">
+      <header class="sidebar-head">
+        <div class="brand">
+          <div class="brand-logo" aria-hidden="true">S</div>
+          <div class="brand-text">
+            <h1>Snapeverse</h1>
+            <p data-i18n="subtitle">Архів чатів</p>
+          </div>
+        </div>
+        <div class="lang-switch" id="lang-switch" role="group" aria-label="Мова інтерфейсу">
+          <button type="button" data-lang="uk" class="active">UA</button>
+          <button type="button" data-lang="ru">RU</button>
+        </div>
+      </header>
+
+      <div class="sidebar-tools">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" type="search" autocomplete="off" spellcheck="false" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchAria" aria-label="Пошук по словах">
+          <button class="search-clear" id="search-clear" type="button" data-i18n-aria="clearSearch" data-i18n-title="clearSearch" aria-label="Очистити пошук" hidden>×</button>
+        </div>
+
+        <div class="search-modes" id="search-modes" role="group" data-i18n-aria="searchModeAria">
+          <span class="search-modes-label" data-i18n="searchModeLabel">Шукати:</span>
+          <button type="button" class="mode-chip active" data-search-mode="phrase" data-i18n="searchModePhrase">Фраза</button>
+          <button type="button" class="mode-chip" data-search-mode="words" data-i18n="searchModeWords">Слова</button>
+        </div>
+
+        <div class="field-grid">
+          <label class="field" for="date-select">
+            <span class="field-label" data-i18n="dateLabel">Дата сцени</span>
+            <span class="select-wrap">
+              <select id="date-select" aria-label="Оберіть дату сцени"></select>
+              <svg class="select-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </span>
+          </label>
+
+          <label class="field" for="sort-select">
+            <span class="field-label" data-i18n="sortLabel">Сортування</span>
+            <span class="select-wrap">
+              <select id="sort-select" aria-label="Сортування сцен">
+                <option value="old" data-i18n="sortOld">Спочатку старі</option>
+                <option value="new" data-i18n="sortNew">Спочатку нові</option>
+                <option value="long" data-i18n="sortLong">Найдовші</option>
+                <option value="short" data-i18n="sortShort">Найкоротші</option>
+              </select>
+              <svg class="select-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </span>
+          </label>
+        </div>
+
+        <div class="quick-chars" id="quick-chars" role="group" data-i18n-aria="characterFilter">
+          <button type="button" class="chip active" data-character="all" data-i18n="all">Усі</button>
+          <button type="button" class="chip" data-character="severus">Северус</button>
+          <button type="button" class="chip" data-character="lucius">Люціус</button>
+          <button type="button" class="chip" data-character="both" data-i18n="both">Обидва</button>
+        </div>
+
+        <div class="themes-bar">
+          <button type="button" class="text-btn" id="themes-open" data-i18n-aria="themesAria">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <span data-i18n="themes">Теми</span>
+            <span class="badge" id="theme-count" hidden>0</span>
+          </button>
+          <div class="active-themes" id="active-themes"></div>
+        </div>
+      </div>
+
+      <div class="list-bar">
+        <span id="results-label">Завантаження…</span>
+        <button class="text-btn subtle" id="themes-open-2" type="button" data-i18n="themes">Теми</button>
+      </div>
+
+      <div class="scene-list" id="scene-list" role="list" aria-live="polite"></div>
+
+      <footer class="sidebar-foot" id="sidebar-foot"></footer>
+    </aside>
+
+    <main class="chat" id="chat">
+      <section class="chat-empty" id="chat-empty">
+        <div class="empty-art" aria-hidden="true">S</div>
+        <h2>Snapeverse Archive</h2>
+        <p data-i18n="emptyText">Оберіть сцену зі списку або дату, щоб читати чати Северуса й Люціуса.</p>
+        <div class="empty-stats" id="empty-stats"></div>
+        <button class="btn primary" id="open-latest" type="button" data-i18n="openLatest">Відкрити останню сцену</button>
+        <div class="empty-tips">
+          <span data-i18n="tipSearch">🔍 Пошук по словах</span>
+          <span data-i18n="tipThemes">🎭 Фільтри тем</span>
+          <span data-i18n="tipReply">↩ Клікабельні цитати</span>
+        </div>
+      </section>
+
+      <section class="chat-view" id="chat-view" hidden>
+        <header class="chat-head">
+          <button class="icon-btn back-btn" id="back-btn" type="button" data-i18n-aria="back" data-i18n-title="back" aria-label="До списку сцен">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <div class="chat-head-main">
+            <div class="chat-head-line">
+              <h2 id="chat-title"></h2>
+              <span class="chat-time" id="chat-time"></span>
+            </div>
+            <div class="chat-head-sub" id="chat-sub"></div>
+          </div>
+          <div class="chat-nav">
+            <button class="icon-btn" id="share-scene" type="button" data-i18n-aria="share" data-i18n-title="share" aria-label="Скопіювати посилання">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"/></svg>
+            </button>
+            <button class="icon-btn" id="prev-scene" type="button" data-i18n-aria="prevScene" data-i18n-title="prevScene" aria-label="Попередня сцена">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg>
+            </button>
+            <button class="icon-btn" id="next-scene" type="button" data-i18n-aria="nextScene" data-i18n-title="nextScene" aria-label="Наступна сцена">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10l6 6 6-6"/></svg>
+            </button>
+          </div>
+        </header>
+        <div class="chat-tags" id="chat-tags"></div>
+        <div class="match-bar" id="match-bar" hidden>
+          <span id="match-label"></span>
+          <button class="text-btn" id="match-jump" type="button" data-i18n="toFirstMatch">До першого збігу</button>
+        </div>
+        <div class="messages" id="messages" tabindex="0" aria-label="Повідомлення сцени"></div>
+        <button class="jump-back" id="jump-back" type="button" hidden data-i18n-aria="returnToReading" data-i18n-title="returnToReading" aria-label="Повернутися до місця читання">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        </button>
+      </section>
+
+      <div class="chat-loading" id="loading">
+        <div class="spinner" aria-hidden="true"></div>
+        <p data-i18n="loading">Завантаження архіву…</p>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="themes-overlay" hidden>
+    <section class="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="themes-title">
+      <header class="sheet-head">
+        <div>
+          <h2 id="themes-title" data-i18n="themesTitle">Теми</h2>
+          <p data-i18n="themesText">Оберіть одну або кілька категорій.</p>
+        </div>
+        <button class="icon-btn" id="themes-close" type="button" data-i18n-aria="close" aria-label="Закрити">×</button>
+      </header>
+      <div class="sheet-body">
+        <div class="theme-list" id="theme-list"></div>
+      </div>
+      <footer class="sheet-foot">
+        <button class="btn ghost" id="themes-reset" type="button" data-i18n="reset">Скинути</button>
+        <button class="btn primary" id="themes-apply" type="button" data-i18n="apply">Показати</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="reaction-popover" id="reaction-popover" role="dialog" hidden></div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" type="button" data-i18n-aria="close" aria-label="Закрити">×</button>
+    <div class="lightbox-body" id="lightbox-body"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
